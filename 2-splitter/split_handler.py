@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 from __future__ import print_function
 
 import os
@@ -19,19 +20,24 @@ def split_handler(event, context):
             ).decode('utf8')
     split_and_upload(bucket, key)
 
-
 def split_and_upload(bucket, key, chunksize=int(0.5 * MB)):
-    name = "/tmp/%s" % key
-    s3.download_file(bucket, key, name)
+    name, part_number = get_fileinfo(key)
+    tmpname = "/tmp/%s" % name
+    s3.download_file(bucket, name, tmpname)
 
     tmpdir = tempfile.mkdtemp()
-    with open(name, 'rb') as f:
-        i = 0
-        while True:
-            chunk = f.read(chunksize)
-            if not chunk: break
-            i  = i + 1
-            filename = os.path.join(tmpdir, ('part%03d' % i))
-            with open(filename, 'wb') as nf:
-                nf.write(chunk)
-            s3.upload_file(filename, bucket, key + '.part%03d'%i)
+    with open(tmpname, 'rb') as f:
+        f.seek((part_number-1) * chunksize)
+        chunk = f.read(chunksize)
+        filename = os.path.join(tmpdir, key)
+        with open(filename, 'wb') as nf:
+            nf.write(chunk)
+        s3.upload_file(filename, bucket, "yoropikune." + key)
+
+def get_fileinfo(filename):
+    name, part = filename.rsplit(".", 1)
+    part_number = part.strip("parts")
+    if part_number:
+        return  name, int(part_number)
+    else:
+        sys.exit("filename error")
