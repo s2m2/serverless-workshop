@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import json
 import boto3
+import math
 
 AWS_S3_BUCKET_NAME = 'siimii-compression-upload'
 
@@ -18,7 +19,7 @@ def siimii_fileupload(event, context):
     obj = bucket.Object(file_name)
     print('file size:' + str(obj.content_length))
     count = obj.content_length / FILE_THRESHOLD
-    print('create files:' + str(count))
-    for var in range(0, count):
+    print('create files:' + str(math.ceil(count)))
+    for var in range(0, int(math.ceil(count))):
         bucket.put_object(Key='photo.jpg.parts' + str(var));
     return {'result': 'Success'}
