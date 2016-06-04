@@ -19,7 +19,17 @@ def siimii_fileupload(event, context):
     obj = bucket.Object(file_name)
     print('file size:' + str(obj.content_length))
     count = obj.content_length / FILE_THRESHOLD
-    print('create files:' + str(math.ceil(count)))
-    for var in range(0, int(math.ceil(count))):
-        bucket.put_object(Key='photo.jpg.parts' + str(var));
+    size = math.ceil(count)
+    print('create files:' + str(size))
+    suffixs = []
+    for index in range(0, int(size)):
+        if index == size-1:
+            suffixs.append(str(index) + '_end')        
+        else:
+            suffixs.append(str(index))
+    if len(suffixs) == 1:
+        bucket.put_object(Key='photo.jpg.parts.only');
+    else:
+        for suffix in suffixs:
+            bucket.put_object(Key='photo.jpg.parts' + suffix);
     return {'result': 'Success'}
