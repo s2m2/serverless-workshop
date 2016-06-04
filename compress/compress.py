@@ -21,7 +21,6 @@ def lambda_handler(event, context):
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
         print("CONTENT TYPE: " + response['ContentType'])
-        print("bucket:{}".format(bucket))
         compress(bucket, key)
         return response['ContentType']
     except Exception as e:
@@ -30,11 +29,9 @@ def lambda_handler(event, context):
         raise e
 
 def compress(bucket, key):
-    tmp_file = "/tmp/" + key
-    zip_file = key + ".zip"
-    tmp_zip_file = "/tmp/" + zip_file
-    print(tmp_file)
-    print(zip_file)
+    tmp_file = "/tmp/{}".format(key)
+    zip_file = "{}.zip".format(key)
+    tmp_zip_file = "/tmp/{}".format(zip_file)
     s3.download_file(bucket, key, tmp_file)
     print("downloaded")
     with zipfile.ZipFile(tmp_zip_file, 'w') as f:
