@@ -13,7 +13,7 @@ import boto3
 MB = (1024*1000)
 s3 = boto3.client('s3')
 
-def split_handler(event, context):
+def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.unquote_plus(
             event['Records'][0]['s3']['object']['key']
