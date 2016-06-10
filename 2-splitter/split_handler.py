@@ -37,7 +37,12 @@ def split_and_upload(bucket, key, chunksize=int(0.5 * MB)):
 def get_fileinfo(filename):
     name, part = filename.rsplit(".", 1)
     part_number = part.strip("parts")
-    if part_number:
-        return  name, int(part_number)
+    if not part_number:
+        sys.exit("filename error")
+    if "end" in part_number:
+        part_number = int(part_number.rstrip("_end"))
+    elif "only" in part_number:
+        part_number = 1
     else:
         sys.exit("filename error")
+    return  name, int(part_number)
