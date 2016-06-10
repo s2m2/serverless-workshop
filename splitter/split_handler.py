@@ -45,5 +45,5 @@ def get_fileinfo(filename):
     elif "only" in part_number:
         part_number = 1
     else:
-        sys.exit("filename error")
+        pass
     return  name, int(part_number)
