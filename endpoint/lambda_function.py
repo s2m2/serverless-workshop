@@ -3,22 +3,19 @@ from __future__ import print_function
 import json
 import boto3
 import math
-
-AWS_S3_BUCKET_NAME = 'siimii-compression-upload'
-
-FILE_THRESHOLD = 1024*1000*0.5
+import urllib
 
 print('Loading SiiMii File upload function.')
 
+s3 = boto3.client('s3')
+FILE_THRESHOLD = 1024*1000*0.5
 
 def siimii_fileupload(event, context):
-    file_name = event['Records'][0]['s3']['object']['key']
-    s3 = boto3.resource('s3')
-    client = boto3.client('lambda')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    obj = bucket.Object(file_name)
-    print('file size:' + str(obj.content_length))
-    count = obj.content_length / FILE_THRESHOLD
+    key =urllib.unquote_plus(event['Records'][0]['s3']['object']['key']).decode('utf8')
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    obj = s3.get_object(Bucket=bucket, Key=key)
+    print('file size:' + str(obj["ContentLength"]))
+    count = obj["ContentLength"] / FILE_THRESHOLD
     size = math.ceil(count)
     print('create files:' + str(size))
     suffixs = []
@@ -28,8 +25,8 @@ def siimii_fileupload(event, context):
         else:
             suffixs.append(str(index))
     if len(suffixs) == 1:
-        bucket.put_object(Key='photo.jpg.parts.only');
+        s3.put_object(Bucket=bucket, Key='photo.jpg.parts._only');
     else:
         for suffix in suffixs:
-            bucket.put_object(Key='photo.jpg.parts' + suffix);
+            s3.put_object(Bucket=bucket, Key='photo.jpg.parts' + suffix);
     return {'result': 'Success'}
